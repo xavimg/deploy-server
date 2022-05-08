@@ -17,8 +17,10 @@ type authConnection struct {
 }
 
 // NewUserRepository is creates a new instance of UserRepository
-func NewAuthRepository() AuthRepository {
-	return &authConnection{}
+func NewAuthRepository(db *gorm.DB) AuthRepository {
+	return &authConnection{
+		connection: db,
+	}
 }
 
 func (db *authConnection) VerifyCodeByEmail(email string, code int) (bool, error) {

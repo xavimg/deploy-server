@@ -20,8 +20,9 @@ type adminConnection struct {
 	connection *gorm.DB
 }
 
-func NewAdminRepository() AdminRepository {
-	return &adminConnection{}
+func NewAdminRepository(dbConn *gorm.DB) AdminRepository {
+	return &adminConnection{
+		connection: dbConn}
 }
 
 func (db *adminConnection) InsertAdmin(user entity.User) entity.User {
