@@ -1,10 +1,13 @@
 package main
 
 import (
+	"fmt"
+	"log"
 	"os"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 	"github.com/xavimg/Turing/apituringserver/internal/controller"
 	"github.com/xavimg/Turing/apituringserver/internal/middleware"
 	"github.com/xavimg/Turing/apituringserver/internal/repository"
@@ -33,6 +36,11 @@ var (
 )
 
 func main() {
+
+	errEnv := godotenv.Load(".env")
+	if errEnv != nil {
+		log.Println("impossible get .env")
+	}
 
 	serverPort := os.Getenv("PORT")
 
@@ -81,5 +89,5 @@ func main() {
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	r.Run(serverPort)
+	r.Run(fmt.Sprintf(":%v", serverPort))
 }
