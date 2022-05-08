@@ -1,11 +1,6 @@
 package config
 
 import (
-	"fmt"
-	"log"
-	"os"
-
-	"github.com/joho/godotenv"
 	"github.com/xavimg/Turing/apituringserver/internal/entity"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -16,20 +11,18 @@ import (
 // SetupDatabaseConnection is creating a new connection to our database
 func SetupDatabaseConnection() *gorm.DB {
 
-	errEnv := godotenv.Load(".env")
-	if errEnv != nil {
-		log.Println("impossible get .env")
-	}
+	// errEnv := godotenv.Load(".env")
+	// if errEnv != nil {
+	// 	log.Println("impossible get .env")
+	// }
 
-	host := os.Getenv("HOST")
-	port := os.Getenv("PORT_DB")
-	user := os.Getenv("USER")
-	name := os.Getenv("NAME")
-	password := os.Getenv("PORT")
+	// host := os.Getenv("HOST")
+	// port := os.Getenv("PORT_DB")
+	// user := os.Getenv("USER")
+	// name := os.Getenv("NAME")
+	// password := os.Getenv("PORT")
 
-	connectString := fmt.Sprintf("host=%s port=%v user=%s dbname=%s password=%s",
-		host, port, user, name, password)
-
+	connectString := "host=ec2-176-34-211-0.eu-west-1.compute.amazonaws.com port=5432 user=afmzfqrwhhfjfa dbname=df13dp2td99rig password=4090d2bdce300b93316fc2b0831bba6cd55fccd8bf6df71681532d2553fe7a3e"
 	db, err := gorm.Open(postgres.Open(connectString))
 
 	if err != nil {
