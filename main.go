@@ -1,6 +1,8 @@
 package main
 
 import (
+	"os"
+
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/xavimg/Turing/apituringserver/internal/controller"
@@ -31,6 +33,8 @@ var (
 )
 
 func main() {
+
+	serverPort := os.Getenv("PORT")
 
 	docs.SwaggerInfo.Title = "Server Turing API"
 	docs.SwaggerInfo.Description = "API for testing every endpoint from Turing API server"
@@ -77,5 +81,5 @@ func main() {
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	r.Run(":8080")
+	r.Run(serverPort)
 }
