@@ -1,5 +1,6 @@
 module github.com/xavimg/Turing/apituringserver
 
+// +heroku goVersion go1.17
 go 1.17
 
 require gorm.io/gorm v1.22.5
