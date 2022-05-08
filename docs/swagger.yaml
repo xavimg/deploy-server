@@ -1,0 +1,388 @@
+definitions:
+  dto.CodeVerifyDTO:
+    properties:
+      code:
+        type: integer
+      email:
+        type: string
+    type: object
+  dto.FeatureDTO:
+    properties:
+      body:
+        maxLength: 500
+        minLength: 10
+        type: string
+      title:
+        maxLength: 10
+        minLength: 5
+        type: string
+    required:
+    - body
+    - title
+    type: object
+  dto.LoginDTO:
+    properties:
+      email:
+        type: string
+      password:
+        minLength: 6
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  dto.RegisterDTO:
+    properties:
+      code_verify:
+        type: integer
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        minLength: 6
+        type: string
+    required:
+    - email
+    - name
+    - password
+    type: object
+  dto.UserUpdateDTO:
+    properties:
+      email:
+        type: string
+      name:
+        maxLength: 6
+        minLength: 5
+        type: string
+      password:
+        type: string
+    required:
+    - name
+    type: object
+  helper.Response:
+    properties:
+      data: {}
+      errors: {}
+      message:
+        type: string
+      status:
+        type: boolean
+    type: object
+info:
+  contact: {}
+paths:
+  /api/admin/ban/{id}:
+    put:
+      description: Admin ban user for X time.
+      parameters:
+      - description: Token acces admin
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: ID from query
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/helper.Response'
+        "400":
+          description: Bad Request
+          schema:
+            type: body
+        "500":
+          description: internal server error
+      tags:
+      - Admin
+  /api/admin/login:
+    post:
+      description: entering system as admin.
+      parameters:
+      - description: Body to register
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.LoginDTO'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/helper.Response'
+        "400":
+          description: Bad Request
+          schema:
+            type: body
+        "500":
+          description: internal server error
+      tags:
+      - Admin
+  /api/admin/newfeature:
+    post:
+      description: Admin add new feature to show in version of game info.
+      parameters:
+      - description: Token acces admin
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Body to write new features
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.FeatureDTO'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/helper.Response'
+        "400":
+          description: Bad Request
+          schema:
+            type: body
+        "500":
+          description: internal server error
+      tags:
+      - Admin
+  /api/admin/register:
+    post:
+      description: Register to the server as a new admin.
+      parameters:
+      - description: Body to register
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.RegisterDTO'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/helper.Response'
+        "400":
+          description: Bad Request
+          schema:
+            type: body
+        "500":
+          description: internal server error
+      tags:
+      - Auth
+  /api/admin/unban/{id}:
+    put:
+      description: Admin unban user.
+      parameters:
+      - description: Token acces admin
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: ID from query
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/helper.Response'
+        "400":
+          description: Bad Request
+          schema:
+            type: body
+        "500":
+          description: internal server error
+      tags:
+      - Admin
+  /api/admin/users/:typeUser:
+    get:
+      description: List users depending on param.
+      parameters:
+      - description: typeUser from query
+        in: path
+        name: typeUser
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/helper.Response'
+        "400":
+          description: Bad Request
+          schema:
+            type: body
+        "500":
+          description: internal server error
+      tags:
+      - Admin
+  /api/auth/login:
+    post:
+      description: Login to the server. Check token with backend.
+      parameters:
+      - description: Body to login
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.LoginDTO'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/helper.Response'
+        "400":
+          description: Bad Request
+          schema:
+            type: body
+        "500":
+          description: internal server error
+      tags:
+      - Auth
+  /api/auth/logout:
+    post:
+      description: Logout to the server
+      parameters:
+      - description: ID from query
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/helper.Response'
+        "400":
+          description: Bad Request
+          schema:
+            type: body
+        "500":
+          description: internal server error
+      tags:
+      - Auth
+  /api/auth/register:
+    post:
+      description: Register to the server as a new user. Sends token to backend.
+      parameters:
+      - description: Body to register
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.RegisterDTO'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/helper.Response'
+        "400":
+          description: Bad Request
+          schema:
+            type: body
+        "500":
+          description: internal server error
+      tags:
+      - Auth
+  /api/auth/verifyaccount:
+    post:
+      description: Verify the account with code send to email.
+      parameters:
+      - description: Body to verify account
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CodeVerifyDTO'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/helper.Response'
+        "400":
+          description: Bad Request
+          schema:
+            type: body
+        "500":
+          description: internal server error
+      tags:
+      - Auth
+  /api/user/deleteaccount:
+    delete:
+      description: Delete account profile.
+      parameters:
+      - description: Token acces login
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/helper.Response'
+        "400":
+          description: Bad Request
+          schema:
+            type: body
+        "500":
+          description: internal server error
+      tags:
+      - User
+  /api/user/profile:
+    get:
+      description: Profile of X user.
+      parameters:
+      - description: Token acces login
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/helper.Response'
+        "400":
+          description: Bad Request
+          schema:
+            type: body
+        "500":
+          description: internal server error
+      tags:
+      - User
+  /api/user/update:
+    put:
+      description: Update profile.
+      parameters:
+      - description: Token acces login
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Update profile user
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UserUpdateDTO'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/helper.Response'
+        "400":
+          description: Bad Request
+          schema:
+            type: body
+        "500":
+          description: internal server error
+      tags:
+      - User
+swagger: "2.0"
