@@ -42,7 +42,7 @@ func CloseDatabaseConnection(db *gorm.DB) {
 	dbSQL, err := db.DB()
 
 	if err != nil {
-		panic("Failed to close connection from database")
+		panic("failed to close connection from database")
 	}
 
 	dbSQL.Close()
