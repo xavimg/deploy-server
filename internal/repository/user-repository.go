@@ -31,10 +31,8 @@ type userConnection struct {
 }
 
 // NewUserRepository is creates a new instance of UserRepository
-func NewUserRepository(db *gorm.DB) UserRepository {
-	return &userConnection{
-		connection: db,
-	}
+func NewUserRepository() UserRepository {
+	return &userConnection{}
 }
 
 func (db *userConnection) InsertUser(user entity.User) entity.User {

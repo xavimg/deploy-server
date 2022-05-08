@@ -3,12 +3,10 @@ package main
 import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	"github.com/xavimg/Turing/apituringserver/internal/config"
 	"github.com/xavimg/Turing/apituringserver/internal/controller"
 	"github.com/xavimg/Turing/apituringserver/internal/middleware"
 	"github.com/xavimg/Turing/apituringserver/internal/repository"
 	"github.com/xavimg/Turing/apituringserver/internal/service"
-	"gorm.io/gorm"
 
 	"github.com/xavimg/Turing/apituringserver/docs"
 
@@ -17,10 +15,10 @@ import (
 )
 
 var (
-	db              *gorm.DB                   = config.SetupDatabaseConnection()
-	userRepository  repository.UserRepository  = repository.NewUserRepository(db)
-	adminRepository repository.AdminRepository = repository.NewAdminRepository(db)
-	authRepository  repository.AuthRepository  = repository.NewAuthRepository(db)
+	// db              *gorm.DB                   = config.SetupDatabaseConnection()
+	userRepository  repository.UserRepository  = repository.NewUserRepository()
+	adminRepository repository.AdminRepository = repository.NewAdminRepository()
+	authRepository  repository.AuthRepository  = repository.NewAuthRepository()
 
 	jwtService   service.JWTService   = service.NewJWTService()
 	userService  service.UserService  = service.NewUserService(userRepository)
