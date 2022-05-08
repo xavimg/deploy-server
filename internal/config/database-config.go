@@ -11,7 +11,7 @@ import (
 // SetupDatabaseConnection is creating a new connection to our database
 func SetupDatabaseConnection() *gorm.DB {
 
-	connectString := "host=postgres port=5432 user=postgres dbname=turingdb password=v6vpxdkd sslmode=disable"
+	connectString := "host=localhost port=5432 user=postgres dbname=turingdb password=v6vpxdkd sslmode=disable"
 
 	db, err := gorm.Open(postgres.Open(connectString))
 
