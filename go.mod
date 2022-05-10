@@ -51,11 +51,14 @@ require (
 	github.com/go-openapi/swag v0.19.15 // indirect
 	github.com/google/go-cmp v0.5.1 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
+	github.com/mailjet/mailjet-apiv3-go v0.0.0-20201009050126-c24bc15a9394 // indirect
 	github.com/mailru/easyjson v0.7.6 // indirect
 	golang.org/x/net v0.0.0-20220127200216-cd36cc0744dd // indirect
 	golang.org/x/tools v0.1.7 // indirect
 	google.golang.org/appengine v1.4.0 // indirect
 	google.golang.org/protobuf v1.25.0 // indirect
+	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
+	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df // indirect
 )
 
 require (
