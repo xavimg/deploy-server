@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"os"
 	"strconv"
-	"sync"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
@@ -170,10 +169,10 @@ func (c *authController) Register(context *gin.Context) {
 		defer resp.Body.Close()
 	}
 
-	var routine sync.Mutex
-	routine.Lock()
-	go service.SendEmail(registerDTO.Name, registerDTO.Email)
-	routine.Unlock()
+	// var routine sync.Mutex
+	// routine.Lock()
+	// go service.SendEmail(registerDTO.Name, registerDTO.Email)
+	// routine.Unlock()
 
 	response := helper.BuildResponse(true, "Check your email !", createdUser)
 	context.JSON(http.StatusCreated, response)
