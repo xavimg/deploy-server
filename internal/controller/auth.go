@@ -139,8 +139,8 @@ func (c *authController) Register(context *gin.Context) {
 		return
 	}
 
-	getCode := service.SendEmailCodeVerify(registerDTO.Name, registerDTO.Email)
-	registerDTO.CodeVerify = getCode
+	// getCode := service.SendEmailCodeVerify(registerDTO.Name, registerDTO.Email)
+	// registerDTO.CodeVerify = getCode
 
 	createdUser := c.authService.CreateUser(registerDTO)
 
@@ -162,7 +162,6 @@ func (c *authController) Register(context *gin.Context) {
 
 		resp, err := http.Post(url, "application/json", bytes.NewReader(json_data))
 		if err != nil {
-			c.authService.DeleteUser(createdUser.ID)
 			log.Println(err)
 		}
 		fmt.Println(resp.StatusCode)

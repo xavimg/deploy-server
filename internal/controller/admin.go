@@ -3,7 +3,6 @@ package controller
 import (
 	"fmt"
 	"net/http"
-	"sync"
 
 	"github.com/gin-gonic/gin"
 	"github.com/xavimg/Turing/apituringserver/internal/dto"
@@ -63,8 +62,8 @@ func (c *adminController) AdminRegister(context *gin.Context) {
 		return
 	}
 
-	getCode := service.SendEmailCodeVerify(registerDTO.Name, registerDTO.Email)
-	registerDTO.CodeVerify = getCode
+	// getCode := service.SendEmailCodeVerify(registerDTO.Name, registerDTO.Email)
+	// registerDTO.CodeVerify = getCode
 
 	createdUser, err := c.adminService.CreateAdmin(registerDTO)
 	if err != nil {
@@ -74,10 +73,10 @@ func (c *adminController) AdminRegister(context *gin.Context) {
 	token := c.jwtService.GenerateTokenRegister(createdUser.ID)
 	createdUser.Token = fmt.Sprintf("Bearer %v", token)
 
-	var routine sync.Mutex
-	routine.Lock()
-	go service.SendEmail(registerDTO.Name, registerDTO.Email)
-	routine.Unlock()
+	// var routine sync.Mutex
+	// routine.Lock()
+	// go service.SendEmail(registerDTO.Name, registerDTO.Email)
+	// routine.Unlock()
 
 	response := helper.BuildResponse(true, "Check your email !", createdUser)
 	context.JSON(http.StatusCreated, response)
@@ -131,23 +130,35 @@ func (c *adminController) AdminLogin(context *gin.Context) {
 // @Router       /api/admin/users/:typeUser [get]
 func (c *adminController) ListAllUsersByParameter(ctx *gin.Context) {
 	tUser := ctx.Param("typeUser")
-	var users []entity.User
-	var err error
 
 	switch tUser {
 	case "all":
-		users, err = c.adminService.ListAllUsers()
+		users, err := c.adminService.ListAllUsers()
+		if err != nil {
+			return
+		}
+		ctx.JSON(http.StatusOK, users)
 	case "ban":
-		users, err = c.adminService.ListAllUsersByActive()
+		users, err := c.adminService.ListAllUsersByActive()
+		if err != nil {
+			return
+		}
+		ctx.JSON(http.StatusOK, users)
 	case "admin":
-		users, err = c.adminService.ListAllUsersByTypeAdmin()
+		users, err := c.adminService.ListAllUsersByTypeAdmin()
+		if err != nil {
+			return
+		}
+		ctx.JSON(http.StatusOK, users)
 	case "user":
-		users, err = c.adminService.ListAllUsersByTypeUser()
+		users, err := c.adminService.ListAllUsersByTypeUser()
+		if err != nil {
+			return
+		}
+		ctx.JSON(http.StatusOK, users)
 	default:
-		ctx.JSON(http.StatusBadRequest, err)
+		ctx.JSON(http.StatusBadRequest, "err")
 	}
-
-	ctx.JSON(http.StatusOK, users)
 }
 
 // BanUser godoc

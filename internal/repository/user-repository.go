@@ -12,16 +12,16 @@ import (
 // UserRepository is a contract what UserRepository can do to db.
 type UserRepository interface {
 	InsertUser(user entity.User) entity.User
-	UpdateUser(user entity.User, userID string, newInfo dto.UserUpdateDTO) (entity.User, error)
+	UpdateUser(user entity.User, userID interface{}, newInfo dto.UserUpdateDTO) (entity.User, error)
 	VerifyCredential(email, password string) (interface{}, error)
 	VerifyUserExist(userID interface{}) (interface{}, error)
 	VerifyUserActive(email interface{}) (entity.User, error)
 	IsDuplicateEmail(email string) (ctx *gorm.DB, err error)
 	FindByEmail(username string) (entity.User, error)
-	ProfileUser(userID string) (entity.User, error)
+	ProfileUser(userID interface{}) (entity.User, error)
 	SaveToken(user entity.User, token string) error
 	DeleteToken(user entity.User, token string) error
-	DeleteAccount(userID uint64) error
+	DeleteAccount(userID float64) error
 	GetToken(userID interface{}) (entity.User, error)
 	CheckRole(id interface{}) (entity.TypeUser, error)
 }
@@ -45,7 +45,7 @@ func (db *userConnection) InsertUser(user entity.User) entity.User {
 	return user
 }
 
-func (db *userConnection) UpdateUser(user entity.User, userID string, newInfo dto.UserUpdateDTO) (entity.User, error) {
+func (db *userConnection) UpdateUser(user entity.User, userID interface{}, newInfo dto.UserUpdateDTO) (entity.User, error) {
 	if newInfo.Name != "" {
 		db.connection.Model(user).Where("id = ?", userID).Update("name", newInfo.Name)
 	}
@@ -99,16 +99,16 @@ func (db *userConnection) IsDuplicateEmail(email string) (tx *gorm.DB, err error
 	return db.connection.Where("email = ?", email).Take(&user), nil
 }
 
-func (db *userConnection) ProfileUser(userID string) (entity.User, error) {
+func (db *userConnection) ProfileUser(userID interface{}) (entity.User, error) {
 	var user entity.User
 	db.connection.Find(&user, userID)
 
 	return user, nil
 }
 
-func (db *userConnection) DeleteAccount(userID uint64) error {
+func (db *userConnection) DeleteAccount(userID float64) error {
 	var user entity.User
-	if err := db.connection.Delete(&user.ID, userID); err != nil {
+	if err := db.connection.Model(&user).Delete(&user.ID, userID); err != nil {
 		log.Println("Error: ", err)
 		return err.Error
 	}

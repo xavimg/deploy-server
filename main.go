@@ -79,8 +79,8 @@ func main() {
 	userRoutes := r.Group("api/user", middleware.AuthorizeJWT(jwtService))
 	{
 		userRoutes.GET("/profile", userController.Profile)
-		userRoutes.PUT("/update", userController.Update)
-		userRoutes.DELETE("/profile/:id", userController.DeleteAccount)
+		userRoutes.PUT("/profile", userController.Update)
+		userRoutes.DELETE("/profile", userController.DeleteAccount)
 	}
 
 	adminRoutes := r.Group("api/admin")

@@ -1,6 +1,8 @@
 package middleware
 
 import (
+	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -25,10 +27,17 @@ func AuthorizeJWT(jwtService service.JWTService) gin.HandlerFunc {
 		}
 
 		token, err := jwtService.ValidateToken(authHeader)
+		if err != nil {
+			log.Println(err)
+			return
+		}
+
+		fmt.Println(token.Valid)
 
 		if !token.Valid {
 			response := helper.BuildErrorResponse("Token is not valid", err.Error(), nil)
 			context.AbortWithStatusJSON(http.StatusUnauthorized, response)
+			return
 		}
 
 		context.Next()

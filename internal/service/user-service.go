@@ -11,9 +11,9 @@ import (
 
 // UserService is a contract about something that this service can do
 type UserService interface {
-	Profile(userID string) (entity.User, error)
-	Update(user dto.UserUpdateDTO, userID string, newInfo dto.UserUpdateDTO) (entity.User, error)
-	DeleteAccount(userID uint64) error
+	Profile(userID interface{}) (entity.User, error)
+	Update(user dto.UserUpdateDTO, userID interface{}, newInfo dto.UserUpdateDTO) (entity.User, error)
+	DeleteAccount(userID float64) error
 	VerifyAccount(email string) entity.User
 	CheckRole(id interface{}) entity.TypeUser
 }
@@ -29,7 +29,7 @@ func NewUserService(userRepo repository.UserRepository) UserService {
 	}
 }
 
-func (service *userService) Profile(userID string) (entity.User, error) {
+func (service *userService) Profile(userID interface{}) (entity.User, error) {
 	user, err := service.userRepository.ProfileUser(userID)
 	if err != nil {
 		return user, err
@@ -38,14 +38,14 @@ func (service *userService) Profile(userID string) (entity.User, error) {
 	return user, err
 }
 
-func (service *userService) DeleteAccount(userID uint64) error {
+func (service *userService) DeleteAccount(userID float64) error {
 	if err := service.userRepository.DeleteAccount(userID); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (service *userService) Update(dataUser dto.UserUpdateDTO, userID string, newInfo dto.UserUpdateDTO) (entity.User, error) {
+func (service *userService) Update(dataUser dto.UserUpdateDTO, userID interface{}, newInfo dto.UserUpdateDTO) (entity.User, error) {
 	passToUpdate := entity.User{}
 
 	err := smapping.FillStruct(&passToUpdate, smapping.MapFields(&dataUser))

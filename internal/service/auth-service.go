@@ -13,7 +13,7 @@ import (
 
 type AuthService interface {
 	CreateUser(user dto.RegisterDTO) entity.User
-	DeleteUser(id uint64) error
+	DeleteUser(id float64) error
 	VerifyCredential(email, password string) interface{}
 	VerifyUserExist(userID interface{}) interface{}
 	VerifyUserActive(email string) (entity.User, error)
@@ -50,7 +50,7 @@ func (service *authService) CreateUser(user dto.RegisterDTO) entity.User {
 	return res
 }
 
-func (service *authService) DeleteUser(id uint64) error {
+func (service *authService) DeleteUser(id float64) error {
 	if err := service.userRepository.DeleteAccount(id); err != nil {
 		return err
 	}

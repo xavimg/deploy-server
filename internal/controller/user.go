@@ -1,12 +1,11 @@
 package controller
 
 import (
-	"fmt"
+	"log"
 	"net/http"
-	"strconv"
 
-	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt"
 	"github.com/xavimg/Turing/apituringserver/internal/dto"
 	"github.com/xavimg/Turing/apituringserver/internal/helper"
 	"github.com/xavimg/Turing/apituringserver/internal/service"
@@ -41,22 +40,18 @@ func NewUserController(userService service.UserService, jwtService service.JWTSe
 // @Router       /api/user/profile [get]
 func (c *userController) Profile(ctx *gin.Context) {
 	authHeader := ctx.GetHeader("Authorization")
-
-	token, err := c.jwtService.ValidateToken(authHeader)
-	if err != nil {
-		panic(err.Error())
-	}
+	token, _ := jwt.Parse(authHeader, func(token *jwt.Token) (interface{}, error) {
+		return []byte("turingoffworld"), nil
+	})
 
 	claims := token.Claims.(jwt.MapClaims)
-	userID := fmt.Sprintf("%v", claims["user_id"])
+	id := claims["user_id"]
 
-	// Send ID to service
-	user, err := c.userService.Profile(userID)
+	user, err := c.userService.Profile(id)
 	if err != nil {
 		return
 	}
 
-	// response
 	res := helper.BuildResponse(true, "Get user profile successfully", user)
 	ctx.JSON(http.StatusOK, res)
 }
@@ -74,9 +69,7 @@ func (c *userController) Profile(ctx *gin.Context) {
 func (c *userController) Update(ctx *gin.Context) {
 	var userUpdateDTO dto.UserUpdateDTO
 
-	// NewPass
-	err := ctx.ShouldBindJSON(&userUpdateDTO)
-	if err != nil {
+	if err := ctx.ShouldBindJSON(&userUpdateDTO); err != nil {
 		res := helper.BuildErrorResponse(
 			"Update user failed", err.Error(),
 			helper.EmptyObj{})
@@ -84,25 +77,20 @@ func (c *userController) Update(ctx *gin.Context) {
 		return
 	}
 
-	// Get token from userController
 	authHeader := ctx.GetHeader("Authorization")
-	token, errToken := c.jwtService.ValidateToken(authHeader)
-
-	if err != nil {
-		panic(errToken.Error())
-	}
+	token, _ := jwt.Parse(authHeader, func(token *jwt.Token) (interface{}, error) {
+		return []byte("turingoffworld"), nil
+	})
 
 	claims := token.Claims.(jwt.MapClaims)
-	userID := fmt.Sprintf("%v", claims["user_id"])
+	id := claims["user_id"]
 
-	user, err := c.userService.Update(userUpdateDTO, userID, userUpdateDTO)
-	if err != nil {
+	if _, err := c.userService.Update(userUpdateDTO, id, userUpdateDTO); err != nil {
+		log.Println(err)
 		return
 	}
 
-	res := helper.BuildResponse(true, "Update user successfully", user)
-	ctx.JSON(http.StatusOK, res)
-
+	ctx.JSON(http.StatusOK, "succesfully updated")
 }
 
 // DeleteAccount godoc
@@ -115,24 +103,18 @@ func (c *userController) Update(ctx *gin.Context) {
 // @Failure      500 "internal server error"
 // @Router       /api/user/deleteaccount [delete]
 func (c *userController) DeleteAccount(ctx *gin.Context) {
-
 	authHeader := ctx.GetHeader("Authorization")
-	token, err := c.jwtService.ValidateToken(authHeader)
-	if err != nil {
-		panic(err.Error())
-	}
+	token, _ := jwt.Parse(authHeader, func(token *jwt.Token) (interface{}, error) {
+		return []byte("turingoffworld"), nil
+	})
 
 	claims := token.Claims.(jwt.MapClaims)
-	userID := fmt.Sprintf("%v", claims["user_id"])
-	number, err := strconv.ParseUint(userID, 10, 64)
-	if err != nil {
+	id := claims["user_id"].(float64)
+
+	if err := c.userService.DeleteAccount(id); err != nil {
+		log.Println(err)
 		return
 	}
 
-	// Send ID to service
-	user := c.userService.DeleteAccount(number)
-
-	// response
-	res := helper.BuildResponse(true, "user deleted profile successfully", user)
-	ctx.JSON(http.StatusOK, res)
+	ctx.JSON(http.StatusOK, "your account is gonna be delated once you log out")
 }

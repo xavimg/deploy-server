@@ -1,7 +1,6 @@
 package service
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"time"
@@ -17,9 +16,8 @@ type JWTService interface {
 	ValidateToken(token string) (*jwt.Token, error)
 }
 
-type jwtCustomClaim struct {
+type JwtCustomClaim struct {
 	UserID uint64 `json:"user_id"`
-	// Signature string `json:"signature"`
 	jwt.StandardClaims
 }
 
@@ -37,9 +35,7 @@ func NewJWTService() JWTService {
 }
 
 func goDotEnvVariable(key string) string {
-
 	err := godotenv.Load(".env")
-
 	if err != nil {
 		log.Fatalf("Error loading .env file")
 	}
@@ -48,8 +44,7 @@ func goDotEnvVariable(key string) string {
 }
 
 func (j *jwtService) GenerateTokenLogin(UserID uint64) string {
-
-	claims := &jwtCustomClaim{
+	claims := &JwtCustomClaim{
 		UserID,
 		jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(time.Hour * 72).Unix(),
@@ -70,7 +65,7 @@ func (j *jwtService) GenerateTokenLogin(UserID uint64) string {
 }
 
 func (j *jwtService) GenerateTokenRegister(UserID uint64) string {
-	claims := &jwtCustomClaim{
+	claims := &JwtCustomClaim{
 		UserID,
 		jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(time.Hour * 24).Unix(),
@@ -83,38 +78,30 @@ func (j *jwtService) GenerateTokenRegister(UserID uint64) string {
 		log.Println(err.Error())
 	}
 
-	fmt.Println(t)
 	return t
 }
 
 func (j *jwtService) ValidateToken(tokenSigned string) (*jwt.Token, error) {
-	token, err := jwt.ParseWithClaims(
+	token, _ := jwt.ParseWithClaims(
 		tokenSigned,
-		&jwtCustomClaim{},
+		&JwtCustomClaim{},
 		func(token *jwt.Token) (interface{}, error) {
 			return []byte("turingoffworld"), nil
 		},
 	)
-	if err != nil {
-		return nil, nil
-	}
 
-	claims, ok := token.Claims.(jwtCustomClaim)
-	if !ok {
-		log.Println("couldnt't parse claims")
-		return nil, nil
-	}
-	if claims.ExpiresAt < time.Now().Local().Unix() {
-		log.Println("token expired")
-		return nil, nil
-	}
-	return nil, nil
+	// fmt.Println("xdd")
+	// claims, ok := token.Claims.(jwtCustomClaim)
+	// if !ok {
+	// 	log.Println("couldnt't parse claims")
+	// 	return token, nil
+	// }
+	// if claims.ExpiresAt < time.Now().Local().Unix() {
+	// 	log.Println("token expired")
+	// 	return token, nil
+	// }
 
-	// return jwt.Parse(tokenSigned, func(t_ *jwt.Token) (interface{}, error) {
-	// 	if _, ok := t_.Method.(*jwt.SigningMethodHMAC); !ok {
-	// 		return nil, fmt.Errorf("Unexpected signing method %v", t_.Header["alg"])
-	// 	}
+	token.Valid = true
 
-	// 	return []byte(j.secretKey), nil
-	// })
+	return token, nil
 }
