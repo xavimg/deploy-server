@@ -64,9 +64,7 @@ func (service *authService) VerifyCredential(email, password string) interface{}
 	}
 
 	if v, ok := res.(entity.User); ok {
-
 		comparedPassword := comparePassword(v.Password, []byte(password))
-
 		if v.Email == email && comparedPassword {
 			return res
 		}
@@ -77,14 +75,12 @@ func (service *authService) VerifyCredential(email, password string) interface{}
 }
 
 func (service *authService) VerifyUserExist(id interface{}) interface{} {
-
 	res, err := service.userRepository.VerifyUserExist(id)
 	if err != nil {
 		return err
 	}
 
 	if v, ok := res.(entity.User); ok {
-
 		if strconv.FormatUint(v.ID, 10) == id {
 			return res
 		}

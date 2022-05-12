@@ -169,11 +169,6 @@ func (c *authController) Register(context *gin.Context) {
 		defer resp.Body.Close()
 	}
 
-	// var routine sync.Mutex
-	// routine.Lock()
-	// go service.SendEmail(registerDTO.Name, registerDTO.Email)
-	// routine.Unlock()
-
 	response := helper.BuildResponse(true, "Check your email !", createdUser)
 	context.JSON(http.StatusCreated, response)
 }
@@ -203,14 +198,16 @@ func (c *authController) Logout(ctx *gin.Context) {
 	claims := token.Claims.(jwt.MapClaims)
 	id := claims["user_id"]
 
+	fmt.Println(id)
+
 	authResult := c.authService.VerifyUserExist(id)
-	if authResult != nil {
+	fmt.Println(authResult)
+	if authResult != false {
 		ctx.JSON(http.StatusBadRequest, "user doesn't exist")
 		return
 	}
 
 	if v, ok := authResult.(entity.User); ok {
-
 		token, err := c.authService.GetToken(id)
 		if err != nil {
 			return
@@ -233,6 +230,8 @@ func (c *authController) Logout(ctx *gin.Context) {
 
 		c.authService.DeleteToken(v, "")
 	}
+
+	ctx.JSON(http.StatusOK, "session logout")
 }
 
 // verifyAccount godoc
