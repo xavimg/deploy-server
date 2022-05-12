@@ -15,13 +15,13 @@ type AuthService interface {
 	CreateUser(user dto.RegisterDTO) entity.User
 	DeleteUser(id uint64) error
 	VerifyCredential(email, password string) interface{}
-	VerifyUserExist(userID string) interface{}
-	VerifyUserActive(email string) entity.User
+	VerifyUserExist(userID interface{}) interface{}
+	VerifyUserActive(email string) (entity.User, error)
 	FindByEmail(email string) (entity.User, error)
-	IsDuplicateEmail(email string) bool
+	IsDuplicateEmail(email string) (bool, error)
 	SaveToken(user entity.User, token string)
 	DeleteToken(user entity.User, s string)
-	GetToken(UserID string) entity.User
+	GetToken(UserID interface{}) (entity.User, error)
 	VerifyCode(email string, code int) (bool, error)
 }
 
@@ -58,7 +58,10 @@ func (service *authService) DeleteUser(id uint64) error {
 }
 
 func (service *authService) VerifyCredential(email, password string) interface{} {
-	res := service.userRepository.VerifyCredential(email, password)
+	res, err := service.userRepository.VerifyCredential(email, password)
+	if err != nil {
+		return err
+	}
 
 	if v, ok := res.(entity.User); ok {
 
@@ -73,9 +76,12 @@ func (service *authService) VerifyCredential(email, password string) interface{}
 	return false
 }
 
-func (service *authService) VerifyUserExist(id string) interface{} {
+func (service *authService) VerifyUserExist(id interface{}) interface{} {
 
-	res := service.userRepository.VerifyUserExist(id)
+	res, err := service.userRepository.VerifyUserExist(id)
+	if err != nil {
+		return err
+	}
 
 	if v, ok := res.(entity.User); ok {
 
@@ -89,10 +95,13 @@ func (service *authService) VerifyUserExist(id string) interface{} {
 
 }
 
-func (service *authService) IsDuplicateEmail(email string) bool {
-	res := service.userRepository.IsDuplicateEmail(email)
+func (service *authService) IsDuplicateEmail(email string) (bool, error) {
+	res, err := service.userRepository.IsDuplicateEmail(email)
+	if err != nil {
+		return false, err
+	}
 
-	return !(res.Error == nil)
+	return !(res.Error == nil), nil
 }
 
 func comparePassword(hashedPwd string, plainPassword []byte) bool {
@@ -120,14 +129,21 @@ func (service *authService) DeleteToken(user entity.User, s string) {
 	service.userRepository.DeleteToken(user, s)
 }
 
-func (service *authService) GetToken(userID string) entity.User {
-
-	return service.userRepository.GetToken(userID)
+func (service *authService) GetToken(userID interface{}) (entity.User, error) {
+	user, err := service.userRepository.GetToken(userID)
+	if err != nil {
+		return user, err
+	}
+	return user, nil
 }
 
-func (service *authService) VerifyUserActive(email string) entity.User {
+func (service *authService) VerifyUserActive(email string) (entity.User, error) {
+	user, err := service.userRepository.VerifyUserActive(email)
+	if err != nil {
+		return user, err
+	}
 
-	return service.userRepository.VerifyUserActive(email)
+	return user, nil
 
 }
 

@@ -6,14 +6,14 @@ import (
 )
 
 type AdminRepository interface {
-	InsertAdmin(admin entity.User) entity.User
-	ListAllUsers() []entity.User
-	ListAllUsersByActive() []entity.User
-	ListAllUsersByTypeAdmin() []entity.User
-	ListAllUsersByTypeUser() []entity.User
-	BanUser(userID string)
-	UnbanUser(userID string)
-	NewFeature(feature entity.Feature) entity.Feature
+	InsertAdmin(admin entity.User) (entity.User, error)
+	ListAllUsers() ([]entity.User, error)
+	ListAllUsersByActive() ([]entity.User, error)
+	ListAllUsersByTypeAdmin() ([]entity.User, error)
+	ListAllUsersByTypeUser() ([]entity.User, error)
+	BanUser(userID string) error
+	UnbanUser(userID string) error
+	NewFeature(feature entity.Feature) (entity.Feature, error)
 }
 
 type adminConnection struct {
@@ -25,54 +25,77 @@ func NewAdminRepository(dbConn *gorm.DB) AdminRepository {
 		connection: dbConn}
 }
 
-func (db *adminConnection) InsertAdmin(user entity.User) entity.User {
+func (db *adminConnection) InsertAdmin(user entity.User) (entity.User, error) {
 	user.Password = hashAndSalt([]byte(user.Password))
 	user.TypeUser = "admin"
 
-	db.connection.Create(&user)
+	if err := db.connection.Create(&user); err != nil {
+		return entity.User{}, err.Error
+	}
 
-	return user
+	return user, nil
 }
 
-func (db *adminConnection) ListAllUsers() []entity.User {
+func (db *adminConnection) ListAllUsers() ([]entity.User, error) {
 	var users []entity.User
-	db.connection.Model(users).Find(&users)
-	return users
+	if err := db.connection.Model(users).Find(&users); err != nil {
+		return users, err.Error
+	}
+
+	return users, nil
 }
 
-func (db *adminConnection) ListAllUsersByActive() []entity.User {
+func (db *adminConnection) ListAllUsersByActive() ([]entity.User, error) {
 	var users []entity.User
 	active := false
-	db.connection.Model(users).Where("active = ?", active).Find(&users)
-	return users
+	if err := db.connection.Model(users).Where("active = ?", active).Find(&users); err != nil {
+		return users, err.Error
+	}
+
+	return users, nil
 }
 
-func (db *adminConnection) ListAllUsersByTypeAdmin() []entity.User {
+func (db *adminConnection) ListAllUsersByTypeAdmin() ([]entity.User, error) {
 	var users []entity.User
 	typeUser := "admin"
-	db.connection.Model(users).Where("type_user = ?", typeUser).Find(&users)
-	return users
+	if err := db.connection.Model(users).Where("type_user = ?", typeUser).Find(&users); err != nil {
+		return users, err.Error
+	}
+
+	return users, nil
 }
 
-func (db *adminConnection) ListAllUsersByTypeUser() []entity.User {
+func (db *adminConnection) ListAllUsersByTypeUser() ([]entity.User, error) {
 	var users []entity.User
 	typeUser := "user"
-	db.connection.Model(users).Where("type_user = ?", typeUser).Find(&users)
-	return users
+	if err := db.connection.Model(users).Where("type_user = ?", typeUser).Find(&users); err != nil {
+		return users, err.Error
+	}
+
+	return users, nil
 }
 
-func (db *adminConnection) BanUser(userID string) {
+func (db *adminConnection) BanUser(userID string) error {
 	var user entity.User
-	db.connection.Model(user).Where("id = ?", userID).Update("active", false)
+	if err := db.connection.Model(user).Where("id = ?", userID).Update("active", false); err != nil {
+		return err.Error
+	}
+
+	return nil
 }
 
-func (db *adminConnection) UnbanUser(userID string) {
+func (db *adminConnection) UnbanUser(userID string) error {
 	var user entity.User
-	db.connection.Model(user).Where("id = ?", userID).Update("active", true)
+	if err := db.connection.Model(user).Where("id = ?", userID).Update("active", true); err != nil {
+		return err.Error
+	}
+
+	return nil
 }
 
-func (db *adminConnection) NewFeature(feature entity.Feature) entity.Feature {
-
-	db.connection.Save(&feature)
-	return feature
+func (db *adminConnection) NewFeature(feature entity.Feature) (entity.Feature, error) {
+	if err := db.connection.Save(&feature); err != nil {
+		return entity.Feature{}, err.Error
+	}
+	return feature, nil
 }

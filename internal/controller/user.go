@@ -51,7 +51,10 @@ func (c *userController) Profile(ctx *gin.Context) {
 	userID := fmt.Sprintf("%v", claims["user_id"])
 
 	// Send ID to service
-	user := c.userService.Profile(userID)
+	user, err := c.userService.Profile(userID)
+	if err != nil {
+		return
+	}
 
 	// response
 	res := helper.BuildResponse(true, "Get user profile successfully", user)
@@ -92,7 +95,10 @@ func (c *userController) Update(ctx *gin.Context) {
 	claims := token.Claims.(jwt.MapClaims)
 	userID := fmt.Sprintf("%v", claims["user_id"])
 
-	user := c.userService.Update(userUpdateDTO, userID, userUpdateDTO)
+	user, err := c.userService.Update(userUpdateDTO, userID, userUpdateDTO)
+	if err != nil {
+		return
+	}
 
 	res := helper.BuildResponse(true, "Update user successfully", user)
 	ctx.JSON(http.StatusOK, res)

@@ -53,7 +53,11 @@ func (c *adminController) AdminRegister(context *gin.Context) {
 		return
 	}
 
-	if !c.authService.IsDuplicateEmail(registerDTO.Email) {
+	duplicated, err := c.authService.IsDuplicateEmail(registerDTO.Email)
+	if err != nil {
+		return
+	}
+	if !duplicated {
 		response := helper.BuildErrorResponse("User register failed", "Duplicate email", helper.EmptyObj{})
 		context.JSON(http.StatusConflict, response)
 		return
@@ -62,7 +66,10 @@ func (c *adminController) AdminRegister(context *gin.Context) {
 	getCode := service.SendEmailCodeVerify(registerDTO.Name, registerDTO.Email)
 	registerDTO.CodeVerify = getCode
 
-	createdUser := c.adminService.CreateAdmin(registerDTO)
+	createdUser, err := c.adminService.CreateAdmin(registerDTO)
+	if err != nil {
+		return
+	}
 
 	token := c.jwtService.GenerateTokenRegister(createdUser.ID)
 	createdUser.Token = fmt.Sprintf("Bearer %v", token)
@@ -125,18 +132,19 @@ func (c *adminController) AdminLogin(context *gin.Context) {
 func (c *adminController) ListAllUsersByParameter(ctx *gin.Context) {
 	tUser := ctx.Param("typeUser")
 	var users []entity.User
+	var err error
 
 	switch tUser {
 	case "all":
-		users = c.adminService.ListAllUsers()
+		users, err = c.adminService.ListAllUsers()
 	case "ban":
-		users = c.adminService.ListAllUsersByActive()
+		users, err = c.adminService.ListAllUsersByActive()
 	case "admin":
-		users = c.adminService.ListAllUsersByTypeAdmin()
+		users, err = c.adminService.ListAllUsersByTypeAdmin()
 	case "user":
-		users = c.adminService.ListAllUsersByTypeUser()
+		users, err = c.adminService.ListAllUsersByTypeUser()
 	default:
-		ctx.JSON(http.StatusBadRequest, nil)
+		ctx.JSON(http.StatusBadRequest, err)
 	}
 
 	ctx.JSON(http.StatusOK, users)
@@ -203,7 +211,10 @@ func (c *adminController) NewFeature(ctx *gin.Context) {
 		return
 	}
 
-	featureCreated := c.adminService.NewFeature(feature)
+	featureCreated, err := c.adminService.NewFeature(feature)
+	if err != nil {
+		return
+	}
 
 	response := helper.BuildResponse(true, "Feature has been created", featureCreated)
 

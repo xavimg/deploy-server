@@ -4,13 +4,14 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io"
 	"log"
 	"net/http"
 	"os"
 	"strconv"
+	"sync"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt"
 	"github.com/joho/godotenv"
 	"github.com/xavimg/Turing/apituringserver/internal/config"
 	"github.com/xavimg/Turing/apituringserver/internal/dto"
@@ -20,8 +21,7 @@ import (
 )
 
 const (
-	urlAndreba  = "192.168.192.32"
-	portAndreba = "8080"
+	urlAndreba = "https://api-turing-api.herokuapp.com"
 )
 
 // AuthController interface is a contract what this controller can do
@@ -87,7 +87,7 @@ func (c *authController) Login(context *gin.Context) {
 		// Check .env file to change debug mode.
 		if os.Getenv("DEBUG_MODE") == "off" {
 			client := &http.Client{}
-			url := fmt.Sprintf("http://%v:%v/player/signin", urlAndreba, portAndreba)
+			url := fmt.Sprintf("%v/player/signin", urlAndreba)
 			req, err := http.NewRequest("POST", url, nil)
 			req.Header.Add("Authorization", fmt.Sprintf("Bearer %v", generateToken))
 
@@ -130,7 +130,11 @@ func (c *authController) Register(context *gin.Context) {
 		return
 	}
 
-	if !c.authService.IsDuplicateEmail(registerDTO.Email) {
+	duplicated, err := c.authService.IsDuplicateEmail(registerDTO.Email)
+	if err != nil {
+		return
+	}
+	if !duplicated {
 		response := helper.BuildErrorResponse("User register failed", "Duplicate email", helper.EmptyObj{})
 		context.JSON(http.StatusConflict, response)
 		return
@@ -155,22 +159,23 @@ func (c *authController) Register(context *gin.Context) {
 	}
 	// Check .env file to change debug mode.
 	if os.Getenv("DEBUG_MODE") == "off" {
-		url := fmt.Sprintf("http://%v:%v/player/signup", urlAndreba, portAndreba)
+		url := fmt.Sprintf("%v/player/signup", urlAndreba)
 
 		resp, err := http.Post(url, "application/json", bytes.NewReader(json_data))
 		if err != nil {
 			c.authService.DeleteUser(createdUser.ID)
 			log.Println(err)
 		}
+		fmt.Println(resp.StatusCode)
 		defer resp.Body.Close()
 	}
 
-	// var routine sync.Mutex
-	// routine.Lock()
-	// go service.SendEmail(registerDTO.Name, registerDTO.Email)
-	// routine.Unlock()
+	var routine sync.Mutex
+	routine.Lock()
+	go service.SendEmail(registerDTO.Name, registerDTO.Email)
+	routine.Unlock()
 
-	response := helper.BuildResponse(true, "Created user !", createdUser)
+	response := helper.BuildResponse(true, "Check your email !", createdUser)
 	context.JSON(http.StatusCreated, response)
 }
 
@@ -184,32 +189,47 @@ func (c *authController) Register(context *gin.Context) {
 // @Failure      500 "internal server error"
 // @Router       /api/auth/logout [post]
 func (c *authController) Logout(ctx *gin.Context) {
-	id := ctx.Param("id")
+	authHeader := ctx.GetHeader("Authorization")
+
+	if authHeader == "" {
+		response := helper.BuildErrorResponse("Failed to process request", "No token found", nil)
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, response)
+		return
+	}
+
+	token, _ := jwt.Parse(authHeader, func(token *jwt.Token) (interface{}, error) {
+		return []byte("turingoffworld"), nil
+	})
+
+	claims := token.Claims.(jwt.MapClaims)
+	id := claims["user_id"]
 
 	authResult := c.authService.VerifyUserExist(id)
+	if authResult != nil {
+		ctx.JSON(http.StatusBadRequest, "user doesn't exist")
+		return
+	}
+
 	if v, ok := authResult.(entity.User); ok {
 
-		response := c.authService.GetToken(id)
-
-		json_data, _ := json.Marshal(response.Token)
-
-		resp, err := http.Post("http://%v:%v/player/signout", "application/json", bytes.NewReader(json_data))
+		token, err := c.authService.GetToken(id)
 		if err != nil {
-			log.Fatal(err)
-		}
-		defer resp.Body.Close()
-
-		bodyBytes, err := io.ReadAll(resp.Body)
-		if err != nil {
-			log.Fatal("Error reading response", err)
-		}
-
-		bodyString := string(bodyBytes)
-		if bodyString != "true" {
-
-			log.Fatal()
 			return
+		}
 
+		url := fmt.Sprintf("%v/player/signout", urlAndreba)
+		client := &http.Client{}
+		req, err := http.NewRequest("POST", url, nil)
+		req.Header.Add("Authorization", fmt.Sprintf("Bearer %v", token.Token))
+
+		resp, err := client.Do(req)
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		if resp.StatusCode != http.StatusOK {
+			ctx.JSON(http.StatusBadRequest, "No authorization key found")
+			return
 		}
 
 		c.authService.DeleteToken(v, "")
@@ -259,8 +279,5 @@ func (c *authController) GoogleLogin(ctx *gin.Context) {
 	googleConfig := config.SetupConfigGoogle()
 	url := googleConfig.AuthCodeURL("randomstate")
 
-	// generateToken := c.jwtService.GenerateTokenLogin(v.ID)
-
-	// ctx.JSON(http.StatusOK, generateToken)
 	ctx.Redirect(303, url)
 }
