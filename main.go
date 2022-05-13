@@ -64,7 +64,7 @@ func main() {
 			"message": "Hello Salle",
 		})
 	})
-
+	r.GET("/hello", authController.GoogleCallback)
 	// public routes
 	authRoutes := r.Group("api/auth")
 	{

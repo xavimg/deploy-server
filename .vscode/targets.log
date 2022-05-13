@@ -10,7 +10,7 @@ make all --print-data-base --no-builtin-variables --no-builtin-rules --question
 make: *** No rule to make target `all'.  Stop.
 
 
-# Make data base, printed on Fri May 13 14:53:38 2022
+# Make data base, printed on Fri May 13 21:25:15 2022
 
 # Variables
 
@@ -33,7 +33,6 @@ SHELL = /bin/sh
 # environment
 VSCODE_NLS_CONFIG = {"locale":"es","availableLanguages":{},"_languagePackSupport":true}
 # environment
- 
 _ = /usr/bin/make
 # makefile (from `Makefile', line 1)
 MAKEFILE_LIST :=  Makefile
@@ -46,7 +45,7 @@ __CFBundleIdentifier = com.microsoft.VSCode
 # environment
 INFOPATH = /opt/homebrew/share/info:
 # environment
-VSCODE_IPC_HOOK_EXTHOST = /var/folders/fn/cb8v00m54v95mg1jcnkl4yx00000gn/T/vscode-ipc-e28d8073-9b21-4c03-b3a4-e733c1e9abfe.sock
+VSCODE_IPC_HOOK_EXTHOST = /var/folders/fn/cb8v00m54v95mg1jcnkl4yx00000gn/T/vscode-ipc-ef5f1d3f-ab77-460c-9f13-2c7e740a8426.sock
 # environment
 VSCODE_CWD = /
 # environment
@@ -57,6 +56,7 @@ PATH = /opt/homebrew/opt/go/libexec/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/us
 LSCOLORS = Gxfxcxdxbxegedabagacad
 # environment
 GOPATH = /Users/xaviermoyaguixe/go
+ 
 # environment
 VSCODE_LOG_STACK = false
 # environment
@@ -140,7 +140,6 @@ HOMEBREW_PREFIX = /opt/homebrew
 # automatic
 +D = $(patsubst %/,%,$(dir $+))
 # automatic
- 
 +F = $(notdir $+)
 # environment
 HOMEBREW_REPOSITORY = /opt/homebrew
@@ -232,6 +231,7 @@ doc:
 	
 
 # files hash-table stats:
+ 
 # Load=6/1024=1%, Rehash=0, Collisions=0/18=0%
 # VPATH Search Paths
 
@@ -244,7 +244,6 @@ doc:
 # strcache size: total = 4096 / max = 4096 / min = 4096 / avg = 4096
 # strcache free: total = 4087 / max = 4087 / min = 4087 / avg = 4087
 
- 
-# Finished Make data base on Fri May 13 14:53:38 2022
+# Finished Make data base on Fri May 13 21:25:15 2022
 
  
