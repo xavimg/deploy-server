@@ -55,7 +55,7 @@ func main() {
 	r := gin.Default()
 	r.Use(cors.New(cors.Config{
 		AllowOrigins: []string{"*"},
-		AllowMethods: []string{"POST", "PUT", "PATCH", "DELETE"},
+		AllowMethods: []string{"GET", "POST", "PUT", "PATCH", "DELETE"},
 		AllowHeaders: []string{"Content-Type, Access-Control-Allow-Origin, Access-Control-Allow-Headers"},
 	}))
 
@@ -68,7 +68,6 @@ func main() {
 	// public routes
 	authRoutes := r.Group("api/auth")
 	{
-		authRoutes.GET("/hello", authController.GoogleCallback)
 		authRoutes.GET("/google/login", authController.GoogleLogin)
 		authRoutes.GET("/google/callback", authController.GoogleCallback)
 		authRoutes.POST("/register", authController.Register)
