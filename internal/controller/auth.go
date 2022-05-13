@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -30,6 +31,7 @@ type AuthController interface {
 	Logout(context *gin.Context)
 	VerifyAccount(context *gin.Context)
 	GoogleLogin(context *gin.Context)
+	GoogleCallback(context *gin.Context)
 }
 type authController struct {
 	authService service.AuthService
@@ -277,4 +279,38 @@ func (c *authController) GoogleLogin(ctx *gin.Context) {
 	url := googleConfig.AuthCodeURL("randomstate")
 
 	ctx.Redirect(303, url)
+}
+
+func (c *authController) GoogleCallback(ctx *gin.Context) {
+	state := ctx.Request.URL.Query()["state"][0]
+	if state != "randomstate" {
+		log.Println("state doesn't match")
+		return
+	}
+
+	code := ctx.Request.URL.Query()["code"][0]
+	googleConfig := config.SetupConfigGoogle()
+	token, err := googleConfig.Exchange(ctx, code)
+	if err != nil {
+		log.Println("google token failed")
+		return
+	}
+
+	resp, err := http.Get("https://www.googleapis.com/oauth2/v2/userinfo?acces_token=" + token.AccessToken)
+	if err != nil {
+		log.Println("failed fetching user")
+		return
+	}
+
+	fmt.Println(resp.Body)
+
+	userdate, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Println("failed parsing json user data")
+		return
+	}
+
+	fmt.Println(userdate)
+
+	ctx.Redirect(303, string(userdate))
 }

@@ -9,7 +9,7 @@ func SetupConfigGoogle() *oauth2.Config {
 	conf := &oauth2.Config{
 		ClientID:     "6116145082-n6bu7lpemg1cicrooa19gepmmhh9n4uu.apps.googleusercontent.com",
 		ClientSecret: "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",
-		RedirectURL:  "http://localhost:8081/hello",
+		RedirectURL:  "https://turing-salle-server.herokuapp.com/hello",
 		Scopes: []string{
 			"https://www.googleapis.com/auth/userinfo.email",
 			"https://www.googleapis.com/auth/userinfo.profile",

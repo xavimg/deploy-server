@@ -59,16 +59,18 @@ func main() {
 		AllowHeaders: []string{"Content-Type, Access-Control-Allow-Origin, Access-Control-Allow-Headers"},
 	}))
 
-	r.GET("/hello", func(c *gin.Context) {
+	r.GET("/health", func(c *gin.Context) {
 		c.JSON(200, gin.H{
-			"message": "Hello Salle ",
+			"message": "Hello Salle",
 		})
 	})
 
 	// public routes
 	authRoutes := r.Group("api/auth")
 	{
+		authRoutes.GET("/hello", authController.GoogleCallback)
 		authRoutes.GET("/google/login", authController.GoogleLogin)
+		authRoutes.GET("/google/callback", authController.GoogleCallback)
 		authRoutes.POST("/register", authController.Register)
 		authRoutes.POST("/login", authController.Login)
 		authRoutes.POST("/logout", authController.Logout)
