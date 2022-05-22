@@ -62,9 +62,6 @@ func (c *adminController) AdminRegister(context *gin.Context) {
 		return
 	}
 
-	// getCode := service.SendEmailCodeVerify(registerDTO.Name, registerDTO.Email)
-	// registerDTO.CodeVerify = getCode
-
 	createdUser, err := c.adminService.CreateAdmin(registerDTO)
 	if err != nil {
 		return

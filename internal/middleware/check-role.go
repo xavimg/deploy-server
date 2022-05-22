@@ -25,7 +25,7 @@ func CheckRole(checkRole service.UserService) gin.HandlerFunc {
 		})
 
 		claims := token.Claims.(jwt.MapClaims)
-		id := claims["UserID"]
+		id := claims["user_id"]
 
 		typeUser := checkRole.CheckRole(id)
 
