@@ -302,15 +302,11 @@ func (c *authController) GoogleCallback(ctx *gin.Context) {
 		return
 	}
 
-	fmt.Println(resp.Body)
-
 	userdate, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		log.Println("failed parsing json user data")
 		return
 	}
-
-	fmt.Println(userdate)
 
 	ctx.Redirect(303, string(userdate))
 }

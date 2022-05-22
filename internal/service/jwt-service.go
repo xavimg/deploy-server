@@ -89,18 +89,6 @@ func (j *jwtService) ValidateToken(tokenSigned string) (*jwt.Token, error) {
 			return []byte("turingoffworld"), nil
 		},
 	)
-
-	// fmt.Println("xdd")
-	// claims, ok := token.Claims.(jwtCustomClaim)
-	// if !ok {
-	// 	log.Println("couldnt't parse claims")
-	// 	return token, nil
-	// }
-	// if claims.ExpiresAt < time.Now().Local().Unix() {
-	// 	log.Println("token expired")
-	// 	return token, nil
-	// }
-
 	token.Valid = true
 
 	return token, nil

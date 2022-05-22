@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 
@@ -10,7 +9,6 @@ import (
 	"github.com/xavimg/Turing/apituringserver/internal/service"
 )
 
-// AuthorizeJWT validates the token user given, return 401 if not valid
 func AuthorizeJWT(jwtService service.JWTService) gin.HandlerFunc {
 	return func(context *gin.Context) {
 		authHeader := context.GetHeader("Authorization")
@@ -31,8 +29,6 @@ func AuthorizeJWT(jwtService service.JWTService) gin.HandlerFunc {
 			log.Println(err)
 			return
 		}
-
-		fmt.Println(token.Valid)
 
 		if !token.Valid {
 			response := helper.BuildErrorResponse("Token is not valid", err.Error(), nil)

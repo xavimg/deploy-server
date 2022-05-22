@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/dgrijalva/jwt-go"
@@ -11,11 +10,13 @@ import (
 )
 
 func CheckRole(checkRole service.UserService) gin.HandlerFunc {
-	return func(ctx *gin.Context) {
-		authHeader := ctx.GetHeader("Authorization")
+	return func(context *gin.Context) {
+
+		authHeader := context.GetHeader("Authorization")
+
 		if authHeader == "" {
 			response := helper.BuildErrorResponse("Failed to process request", "No token found", nil)
-			ctx.AbortWithStatusJSON(http.StatusBadRequest, response)
+			context.AbortWithStatusJSON(http.StatusBadRequest, response)
 			return
 		}
 
@@ -24,14 +25,15 @@ func CheckRole(checkRole service.UserService) gin.HandlerFunc {
 		})
 
 		claims := token.Claims.(jwt.MapClaims)
-		id := claims["user_id"]
+		id := claims["UserID"]
 
 		typeUser := checkRole.CheckRole(id)
-		fmt.Println(typeUser)
+
 		if typeUser != "admin" {
-			ctx.JSON(http.StatusUnauthorized, "not allowed")
-		} else {
-			ctx.Next()
+			context.AbortWithStatusJSON(http.StatusUnauthorized, "not allowed")
 		}
+
+		context.Next()
 	}
+
 }
