@@ -18,12 +18,20 @@ type UserRepository interface {
 	VerifyUserActive(email interface{}) (entity.User, error)
 	IsDuplicateEmail(email string) (ctx *gorm.DB, err error)
 	FindByEmail(username string) (entity.User, error)
-	ProfileUser(userID interface{}) (entity.User, error)
+	ProfileUser(userID interface{}) (*entity.User, error)
 	SaveToken(user entity.User, token string) error
 	DeleteToken(user entity.User, token string) error
 	DeleteAccount(userID float64) error
 	GetToken(userID interface{}) (entity.User, error)
 	CheckRole(id interface{}) (entity.TypeUser, error)
+
+	AddFriend(id interface{}, user *dto.Friend) error
+	ShowFriendlist(id interface{}) ([]*entity.User_Friends, error)
+	RemoveFriend(id uint64) error
+	IsFriend(id interface{}) (bool, error)
+	SendMessage(message entity.User_Messages) error
+	ListMessages(id interface{}) ([]*entity.User_Messages, error)
+	MessageDetail(id int) (*entity.User_Messages, error)
 }
 
 type userConnection struct {
@@ -99,8 +107,8 @@ func (db *userConnection) IsDuplicateEmail(email string) (tx *gorm.DB, err error
 	return db.connection.Where("email = ?", email).Take(&user), nil
 }
 
-func (db *userConnection) ProfileUser(userID interface{}) (entity.User, error) {
-	var user entity.User
+func (db *userConnection) ProfileUser(userID interface{}) (*entity.User, error) {
+	var user *entity.User
 	db.connection.Find(&user, userID)
 
 	return user, nil
@@ -157,4 +165,69 @@ func (db *userConnection) CheckRole(id interface{}) (typeUser entity.TypeUser, e
 
 	return typeUser, nil
 
+}
+
+func (db *userConnection) AddFriend(id interface{}, friend *dto.Friend) error {
+	if err := db.connection.Raw("INSERT INTO user_friends(id_user, id_friend, friendlist) VALUES(?,?,?);", id, friend.ID, friend).Scan(friend).Error; err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (db *userConnection) ShowFriendlist(id interface{}) ([]*entity.User_Friends, error) {
+	friends := []*entity.User_Friends{}
+	result := db.connection.Where("id_user = ?", id).Find(&friends)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return friends, nil
+}
+
+func (db *userConnection) RemoveFriend(id uint64) error {
+	friends := []*entity.User_Friends{}
+	if err := db.connection.Where("id_friend = ?", id).Delete(&friends).Error; err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (db *userConnection) IsFriend(id interface{}) (bool, error) {
+	friends := entity.User_Friends{}
+	var err error
+	if err = db.connection.Select("id_user").Where("id_friend = ?", id).Find(&friends).Error; err != nil {
+		return false, err
+	}
+	if friends.IDUser == 0 {
+		return false, err
+	}
+	return true, nil
+}
+
+func (db *userConnection) SendMessage(m entity.User_Messages) error {
+	if err := db.connection.Raw("INSERT INTO user_messages(receiver, sender, tittle, detail) VALUES(?,?,?,?);", m.Receiver, m.Sender, m.Tittle, m.Detail).Scan(m).Error; err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (db *userConnection) ListMessages(id interface{}) ([]*entity.User_Messages, error) {
+	notifications := []*entity.User_Messages{}
+	if err := db.connection.Select("sender, tittle").Where("receiver = ?", id).Find(&notifications).Error; err != nil {
+		return nil, err
+	}
+
+	return notifications, nil
+}
+
+func (db *userConnection) MessageDetail(id int) (*entity.User_Messages, error) {
+	message := entity.User_Messages{}
+	if err := db.connection.Select("detail, sender").Where("id = ?", id).Find(&message).Error; err != nil {
+		return nil, err
+	}
+
+	return &message, nil
 }

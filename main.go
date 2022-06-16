@@ -22,19 +22,23 @@ import (
 )
 
 var (
-	db              *gorm.DB                   = config.SetupDatabaseConnection()
+	db *gorm.DB = config.SetupDatabaseConnection()
+
 	userRepository  repository.UserRepository  = repository.NewUserRepository(db)
 	adminRepository repository.AdminRepository = repository.NewAdminRepository(db)
 	authRepository  repository.AuthRepository  = repository.NewAuthRepository(db)
+	shopRepository  repository.ShopRepository  = repository.NewShopRepository(db)
 
 	jwtService   service.JWTService   = service.NewJWTService()
 	userService  service.UserService  = service.NewUserService(userRepository)
 	authService  service.AuthService  = service.NewAuthService(userRepository, authRepository)
 	adminService service.AdminService = service.NewAdminService(adminRepository)
+	shopService  service.ShopService  = service.NewShopService(shopRepository)
 
 	authController  controller.AuthController  = controller.NewAuthController(authService, jwtService)
 	userController  controller.UserController  = controller.NewUserController(userService, jwtService)
 	adminController controller.AdminController = controller.NewAdminController(adminService, authService, jwtService)
+	shopController  controller.ShopController  = controller.NewShopController(shopService, jwtService, adminService)
 )
 
 func main() {
@@ -82,6 +86,23 @@ func main() {
 		userRoutes.GET("/profile", userController.Profile)
 		userRoutes.PUT("/profile", userController.Update)
 		userRoutes.DELETE("/profile", userController.DeleteAccount)
+
+		userRoutes.POST("/add-friend/:id", userController.AddFriend)
+		userRoutes.DELETE("/remove-friend/:id", userController.RemoveFriend)
+		userRoutes.GET("/friendlist", userController.ShowFriendlist)
+		userRoutes.GET("/check-friend/:id", userController.IsFriend)
+		userRoutes.POST("/send-message/:id", userController.SendMessage)
+		userRoutes.GET("/list-messages", userController.ListMessages)
+		userRoutes.GET("/list-messages/:id", userController.MessageDetail)
+
+		userRoutes.GET("/products", shopController.ListProducts)
+		userRoutes.GET("/product-detail/:id", shopController.ProductDetail)
+
+		userRoutes.POST("/product/cart/:idcart/product/:id", shopController.AddProductCart)
+		userRoutes.POST("/product/cart/add-payment/:idcart", shopController.AddCreditCard)
+		userRoutes.PUT("/product/cart/add-payment/:idcart", shopController.AddCreditCard)
+		userRoutes.DELETE("/product/cart/:idcart", shopController.DeleteCart)
+		userRoutes.POST("/confirm/cart/:idcart", shopController.ConfirmPayment)
 	}
 
 	adminRoutes := r.Group("api/admin")
@@ -92,6 +113,16 @@ func main() {
 		adminRoutes.PUT("/ban/:id", middleware.CheckRole(userService), adminController.BanUser)
 		adminRoutes.PUT("/unban/:id", middleware.CheckRole(userService), adminController.UnbanUser)
 		adminRoutes.POST("/newfeature", middleware.CheckRole(userService), adminController.NewFeature)
+	}
+
+	shopAdminRoutes := r.Group("api/admin")
+	{
+		shopAdminRoutes.POST("/product", middleware.CheckRole(userService), shopController.InsertProduct)
+		shopAdminRoutes.DELETE("/product/:id", middleware.CheckRole(userService), shopController.DeleteProduct)
+		shopAdminRoutes.PUT("/product/:id", middleware.CheckRole(userService), shopController.UpdateProduct)
+		shopAdminRoutes.GET("/product", middleware.CheckRole(userService), shopController.InsertProduct)
+		shopAdminRoutes.GET("/buys", middleware.CheckRole(userService), shopController.ListBuys)
+
 	}
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))

@@ -210,7 +210,6 @@ func (c *adminController) UnbanUser(ctx *gin.Context) {
 // @Router       /api/admin/newfeature [post]
 func (c *adminController) NewFeature(ctx *gin.Context) {
 	var feature dto.FeatureDTO
-
 	if err := ctx.ShouldBind(&feature); err != nil {
 		res := helper.BuildErrorResponse(
 			"Feature not created", err.Error(),

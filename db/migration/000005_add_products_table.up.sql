@@ -1,0 +1,7 @@
+CREATE TABLE products (
+    id SERIAL NOT NULL PRIMARY KEY,
+    detail VARCHAR NOT NULL,
+    price INTEGER NOT NULL,
+    createdAT TIMESTAMP NOT NULL,
+    UpdatedAT TIMESTAMP NOT NULL
+);

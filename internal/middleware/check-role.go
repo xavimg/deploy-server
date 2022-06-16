@@ -20,20 +20,21 @@ func CheckRole(checkRole service.UserService) gin.HandlerFunc {
 			return
 		}
 
-		token, _ := jwt.Parse(authHeader, func(token *jwt.Token) (interface{}, error) {
+		token, err := jwt.Parse(authHeader, func(token *jwt.Token) (interface{}, error) {
 			return []byte("turingoffworld"), nil
 		})
+		if err != nil {
+			return
+		}
 
 		claims := token.Claims.(jwt.MapClaims)
 		id := claims["user_id"]
 
 		typeUser := checkRole.CheckRole(id)
-
 		if typeUser != "admin" {
 			context.AbortWithStatusJSON(http.StatusUnauthorized, "not allowed")
 		}
 
 		context.Next()
 	}
-
 }

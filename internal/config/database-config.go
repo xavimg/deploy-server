@@ -9,7 +9,7 @@ import (
 )
 
 func SetupDatabaseConnection() *gorm.DB {
-	connectString := "host=ec2-34-246-227-219.eu-west-1.compute.amazonaws.com port=5432 user=dwiuwcchyjajhh dbname=d637cf012r303n password=4ee5daba915b8323b2750b319c0df7c5b167cc1d4e4abfbd1406a0b36354e3c4"
+	connectString := "host=localhost port=5432 user=postgres dbname=turingdb password=v6vpxdkd"
 	db, err := gorm.Open(postgres.Open(connectString))
 	if err != nil {
 		panic("Failed to create a connection to database")

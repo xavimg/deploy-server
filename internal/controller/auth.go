@@ -1,18 +1,14 @@
 package controller
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
-	"os"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
-	"github.com/joho/godotenv"
 	"github.com/xavimg/Turing/apituringserver/internal/config"
 	"github.com/xavimg/Turing/apituringserver/internal/dto"
 	"github.com/xavimg/Turing/apituringserver/internal/entity"
@@ -81,27 +77,27 @@ func (c *authController) Login(context *gin.Context) {
 		v.Token = fmt.Sprintf("Bearer %v", generateToken)
 		c.authService.SaveToken(v, v.Token)
 
-		errEnv := godotenv.Load(".env")
-		if errEnv != nil {
-			log.Println("impossible get .env")
-		}
-		// Check .env file to change debug mode.
-		if os.Getenv("DEBUG_MODE") == "off" {
-			client := &http.Client{}
-			url := fmt.Sprintf("%v/player/signin", urlAndreba)
-			req, err := http.NewRequest("POST", url, nil)
-			req.Header.Add("Authorization", fmt.Sprintf("Bearer %v", generateToken))
+		// errEnv := godotenv.Load(".env")
+		// if errEnv != nil {
+		// 	log.Println("impossible get .env")
+		// }
+		// // Check .env file to change debug mode.
+		// if os.Getenv("DEBUG_MODE") == "off" {
+		// 	client := &http.Client{}
+		// 	url := fmt.Sprintf("%v/player/signin", urlAndreba)
+		// 	req, err := http.NewRequest("POST", url, nil)
+		// 	req.Header.Add("Authorization", fmt.Sprintf("Bearer %v", generateToken))
 
-			resp, err := client.Do(req)
-			if err != nil {
-				log.Println(err)
-				return
-			}
-			if resp.StatusCode != 200 {
-				log.Println("Something went wrong")
-				return
-			}
-		}
+		// 	resp, err := client.Do(req)
+		// 	if err != nil {
+		// 		log.Println(err)
+		// 		return
+		// 	}
+		// 	if resp.StatusCode != 200 {
+		// 		log.Println("Something went wrong")
+		// 		return
+		// 	}
+		// }
 
 		response := helper.BuildResponseSession(true, "User login successfully", generateToken)
 		context.JSON(http.StatusOK, response)
@@ -149,26 +145,26 @@ func (c *authController) Register(context *gin.Context) {
 	token := c.jwtService.GenerateTokenRegister(createdUser.ID)
 	createdUser.Token = fmt.Sprintf("Bearer %v", token)
 
-	json_data, err := json.Marshal(createdUser.ID)
-	if err != nil {
-		return
-	}
+	// json_data, err := json.Marshal(createdUser.ID)
+	// if err != nil {
+	// 	return
+	// }
 
-	errEnv := godotenv.Load(".env")
-	if errEnv != nil {
-		log.Println("impossible get .env")
-	}
-	// Check .env file to change debug mode.
-	if os.Getenv("DEBUG_MODE") == "off" {
-		url := fmt.Sprintf("%v/player/signup", urlAndreba)
+	// errEnv := godotenv.Load(".env")
+	// if errEnv != nil {
+	// 	log.Println("impossible get .env")
+	// }
+	// // Check .env file to change debug mode.
+	// if os.Getenv("DEBUG_MODE") == "off" {
+	// 	url := fmt.Sprintf("%v/player/signup", urlAndreba)
 
-		resp, err := http.Post(url, "application/json", bytes.NewReader(json_data))
-		if err != nil {
-			log.Println(err)
-		}
-		fmt.Println(resp.StatusCode)
-		defer resp.Body.Close()
-	}
+	// 	resp, err := http.Post(url, "application/json", bytes.NewReader(json_data))
+	// 	if err != nil {
+	// 		log.Println(err)
+	// 	}
+	// 	fmt.Println(resp.StatusCode)
+	// 	defer resp.Body.Close()
+	// }
 
 	response := helper.BuildResponse(true, "Check your email !", createdUser)
 	context.JSON(http.StatusCreated, response)
